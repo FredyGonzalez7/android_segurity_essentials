@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if (currentUser != null){
+            /*
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
                             // ...
                         }
                     });
+
+             */
         }
         else {
 
