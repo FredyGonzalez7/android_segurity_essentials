@@ -2,23 +2,43 @@ package com.example.segurity_essentials_class;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import javax.crypto.spec.SecretKeySpec;
 
 public class MainActivity extends AppCompatActivity {
-    private FirebaseAuth mAuth;
+    private static SecretKeySpec secret;
+    EditText email, pass;
+    TextView register;
+    Button login;
+    static String clave = "";
+    //static var clave="";//kotlin
+    //private FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
 
+
+        //email.getText().toString()
+        email = findViewById(R.id.editTextEmail);
+        pass = findViewById(R.id.editTextPass);
+        register = findViewById(R.id.textRegister);
+        login = findViewById(R.id.buttonLogin);
+
+        // Initialize Firebase Auth
+        //mAuth = FirebaseAuth.getInstance();
+        //FirebaseUser currentUser = mAuth.getCurrentUser();
+
+
+        /*
         if (currentUser != null){
-            /*
+
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -40,11 +60,42 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
 
-             */
+
         }
         else {
 
-        }
-
+        }*/
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this,HomeActivity.class));
+            }
+        });
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this,RegisterActivity.class));
+            }
+        });
     }
+
+    //public static SecretKey generateKey()
+/*
+    public static SecretKey generateKey() throws NoSuchAlgorithmException, InvalidKeyException {
+        return secret = new SecretKeySpec(clave.getBytes(), "AES");
+    }
+    public static byte[] encryptMsg(String message, SecretKey secret) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        byte[] cipherText = cipher.doFinal(message.getBytes("UTF-8"));
+        return cipherText;
+    }
+    public static String decrryptMsg(byte[] cipherText, SecretKey secret) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secret);
+        String decryptString = new String(cipher.doFinal(cipherText), "UTF-8");
+        return decryptString;
+    }*/
 }
