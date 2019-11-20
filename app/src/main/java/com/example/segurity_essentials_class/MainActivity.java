@@ -12,7 +12,7 @@ import android.widget.TextView;
 import javax.crypto.spec.SecretKeySpec;
 
 public class MainActivity extends AppCompatActivity {
-    private static SecretKeySpec secret;
+    //private static SecretKeySpec secret;
     EditText email, pass;
     TextView register;
     Button login;
