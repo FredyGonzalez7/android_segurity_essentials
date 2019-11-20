@@ -1,23 +1,33 @@
 package com.example.segurity_essentials_class;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.core.Tag;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -48,7 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         //Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        final FirebaseUser currentUser = mAuth.getCurrentUser();
 
         email = findViewById(R.id.editTextEmail);
         pass = findViewById(R.id.editTextPass);
@@ -56,98 +66,121 @@ public class RegisterActivity extends AppCompatActivity {
         register = findViewById(R.id.buttonRegister);
         login = findViewById(R.id.textLogin);
 
+
+        //findViewById(R.id.buttonRegister).setOnClickListener((View.OnClickListener) this);
+
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (pass.getText().toString().equals(conpass.getText().toString())){
+                if (validateForm()) {
                     //Toast.makeText(getApplicationContext(), "Las claves coinciden", Toast.LENGTH_LONG).show();
-
-                    secretKeySpec =  new SecretKeySpec(clave.getBytes(), "AES");
-
-                    try {
-                        byte[] claveEncryptada = encryptMsg(pass.getText().toString(),secretKeySpec);
-                        //Toast.makeText(getApplicationContext(), claveEncryptada.toString(), Toast.LENGTH_LONG).show();
-                        Toast.makeText(getApplicationContext(), claveEncryptada.toString(), Toast.LENGTH_LONG).show();
-                        String claveDesencriptada = decrryptMsg(claveEncryptada,secretKeySpec);
-                        Toast.makeText(getApplicationContext(), claveDesencriptada, Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), e.getLocalizedMessage()+"  error", Toast.LENGTH_LONG).show();
+                    if (validatePass()){
+                        secretKeySpec = new SecretKeySpec(clave.getBytes(), "AES");
+                        try {
+                            byte[] passEncrypted;
+                            passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
+                            Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
+                            String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
+                            Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage() + "  error", Toast.LENGTH_LONG).show();
+                        }
                     }
-                    /*try {
-                        String claveEncryptada = encryptMsg(pass.getText().toString(),secret);
-                        Toast.makeText(getApplicationContext(), claveEncryptada.toString()+"123", Toast.LENGTH_LONG).show();
-                    } catch (NoSuchAlgorithmException e) {
-                        Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                    else Toast.makeText(getApplicationContext(), "Las contraseñas no coinciden", Toast.LENGTH_LONG).show();
 
-                    } catch (NoSuchPaddingException e) {
-                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    } catch (InvalidKeyException e) {
-                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    } catch (IllegalBlockSizeException e) {
-                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    } catch (BadPaddingException e) {
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                    } catch (InvalidAlgorithmParameterException e) {
-                        e.printStackTrace();
-                        Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                    }
-                    Toast.makeText(getApplicationContext(), "dd", Toast.LENGTH_LONG).show();
-                    */
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "Las claves no coinciden", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Rellene todos los campos", Toast.LENGTH_LONG).show();
                 }
 
             }
         });
     }
     /*
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        //updateUI(currentUser);
+    }*/
+
+    private void createAccount(String email, String password) {
+        //Log.d("TAG", "createAccount:" + email);
+        if (!validateForm()) {
+            //return;
+            Toast.makeText(getApplicationContext(), "Revise los datos", Toast.LENGTH_LONG).show();
+        }
+
+        //showProgressDialog();
+
+        // [START create_user_with_email]
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            //Log.d("TAG", "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            //updateUI(user);
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            //Log.d("TAG", "createUserWithEmail:failure", task.getException());
+                            Toast.makeText(RegisterActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                            //updateUI(null);
+                        }
+
+                        // [START_EXCLUDE]
+                        //hideProgressDialog();
+                        // [END_EXCLUDE]
+                    }
+                });
+        // [END create_user_with_email]
+
+    }
+    /*
+    private void updateUI(FirebaseUser user) {
+        hideProgressDialog();
+        if (user != null) {
+            mStatusTextView.setText(getString(R.string.emailpassword_status_fmt,
+                    user.getEmail(), user.isEmailVerified()));
+            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
+
+            findViewById(R.id.emailPasswordButtons).setVisibility(View.GONE);
+            findViewById(R.id.emailPasswordFields).setVisibility(View.GONE);
+            findViewById(R.id.signedInButtons).setVisibility(View.VISIBLE);
+
+            findViewById(R.id.verifyEmailButton).setEnabled(!user.isEmailVerified());
+        } else {
+            mStatusTextView.setText(R.string.signed_out);
+            mDetailTextView.setText(null);
+
+            findViewById(R.id.emailPasswordButtons).setVisibility(View.VISIBLE);
+            findViewById(R.id.emailPasswordFields).setVisibility(View.VISIBLE);
+            findViewById(R.id.signedInButtons).setVisibility(View.GONE);
+        }
+    }*/
+
+    /*
     public static SecretKey generateKey() throws NoSuchAlgorithmException, InvalidKeyException {
         return secret = new SecretKeySpec(clave.getBytes(), "AES");
     }Arrays.toString(byteArr)*/
+    
     //public String encryptMsg(String message, SecretKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
     public byte[] encryptMsg(String message, SecretKey key) throws Exception {
-            //String text;
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        @SuppressLint("GetInstance") Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(message.getBytes("UTF-8"));
-
-        /*
-        if (key == null) {
-            System.out.print("Key为空null");
-            return null;
-        }
-        // 判断Key是否为16位
-        if (key.length() != 16) {
-            System.out.print("Key长度不是16位");
-            return null;
-        }
-
-        byte[] raw = key.getBytes("UTF-8");
-        SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
-        Cipher cipher = Cipher.getInstance("AES/CBC/Iso10126Padding");//"算法/模式/补码方式"
-        IvParameterSpec ivps = new IvParameterSpec(iv.getBytes("UTF-8"));//使用CBC模式，需要一个向量iv，可增加加密算法的强度
-        cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivps);
-        byte[] encrypted = cipher.doFinal(message.getBytes("UTF-8"));
-        return new String(Base64.encodeBase64(encrypted),"UTF-8");//此处使用BAES64做转码功能，同时能起到2次
-        //return new String(Base64.encodeToString(cipherText),"UTF-8");
-        */
+        return cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static String decrryptMsg(byte[] cipherText, SecretKey secret) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException {
-        Cipher cipher = null;
+    @SuppressLint("GetInstance")
+    public static String decryptMsg(byte[] cipherText, SecretKey secret) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cipher;
         cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, secret);
-        String decryptString = new String(cipher.doFinal(cipherText), "UTF-8");
-        return decryptString;
+        return new String(cipher.doFinal(cipherText), StandardCharsets.UTF_8);
     }
     /*
     public static String registrarUsuario(FirebaseUser currentUser,String email, String password){
@@ -181,5 +214,50 @@ public class RegisterActivity extends AppCompatActivity {
             return "error";
         }
     }*/
+
+
+    private boolean validateForm() {
+        boolean valid = true;
+
+        String localEmail = email.getText().toString();
+        if (TextUtils.isEmpty(localEmail)) {
+            email.setError("Required.");
+            valid = false;
+        } else {
+            email.setError(null);
+        }
+
+        String password = pass.getText().toString();
+        if (TextUtils.isEmpty(password)) {
+            pass.setError("Required.");
+            valid = false;
+        } else {
+            pass.setError(null);
+        }
+
+        String confirmPassword = conpass.getText().toString();
+        if (TextUtils.isEmpty(confirmPassword)) {
+            conpass.setError("Required.");
+            valid = false;
+        } else {
+            conpass.setError(null);
+        }
+        return valid;
+    }
+
+    private boolean validatePass(){
+        boolean valid = true;
+        String password = pass.getText().toString();
+        String confirmPassword = conpass.getText().toString();
+        if (!password.equals(confirmPassword)) {
+            pass.setError("Required.");
+            conpass.setError("Required.");
+            valid = false;
+        } else {
+            pass.setError(null);
+            conpass.setError(null);
+        }
+        return valid;
+    }
 
 }
