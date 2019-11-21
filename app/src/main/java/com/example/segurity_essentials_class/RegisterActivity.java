@@ -4,10 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,12 +17,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.core.Tag;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -34,7 +29,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -44,10 +38,6 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText pass;
     private EditText conpass;
     private TextView login;
-
-    private static String clave = "fredy david gonz";
-    private SecretKeySpec secretKeySpec;
-
 
     private FirebaseAuth mAuth;
 
@@ -72,38 +62,24 @@ public class RegisterActivity extends AppCompatActivity {
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (validateForm()) {
-                    //Toast.makeText(getApplicationContext(), "Las claves coinciden", Toast.LENGTH_LONG).show();
-                    if (validatePass()){
-                        //secretKeySpec = new SecretKeySpec(clave.getBytes(), "AES");
-                        secretKeySpec = generateKey();
-                        try {
-                            byte[] passEncrypted;
-                            passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
-                            Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
-                            String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
-                            Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
-                            //createAccount(email.getText().toString() , pass.getText().toString());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage() + "  error", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    else Toast.makeText(getApplicationContext(), "Las contraseñas no coinciden", Toast.LENGTH_LONG).show();
+                registerUser();
+            }
+        });
 
-                } else {
-                    Toast.makeText(getApplicationContext(), "Rellene todos los campos", Toast.LENGTH_LONG).show();
-                }
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(RegisterActivity.this,MainActivity.class));
             }
         });
     }
 
     private void createAccount(String emailCreate, String passwordCreate) {
-        Toast.makeText(RegisterActivity.this, emailCreate+" - "+passwordCreate, Toast.LENGTH_SHORT).show();
+        /*Toast.makeText(RegisterActivity.this, emailCreate+" - "+passwordCreate, Toast.LENGTH_SHORT).show();
         if (!validateForm()) {
             Toast.makeText(getApplicationContext(), "Revise los datos", Toast.LENGTH_LONG).show();
             return;
-        }
+        }*/
         mAuth.createUserWithEmailAndPassword(emailCreate, passwordCreate)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -112,6 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(RegisterActivity.this, "Authentication exist.", Toast.LENGTH_SHORT).show();
+
                         } else {
                             // If sign in fails, display a message to the user.
                             Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
@@ -145,6 +122,7 @@ public class RegisterActivity extends AppCompatActivity {
     */
 
     public SecretKeySpec generateKey() {
+        String clave = "fredy david gonz";
         return new SecretKeySpec(clave.getBytes(), "AES");
     }
     
@@ -189,6 +167,7 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             conpass.setError(null);
         }
+        //validar que las password tenga por lo menos 6 caracteres
         return valid;
     }
 
@@ -205,5 +184,30 @@ public class RegisterActivity extends AppCompatActivity {
             conpass.setError(null);
         }
         return valid;
+    }
+
+    private void registerUser(){
+        if (validateForm()) {
+            //Toast.makeText(getApplicationContext(), "Las claves coinciden", Toast.LENGTH_LONG).show();
+            if (validatePass()){
+                //secretKeySpec = new SecretKeySpec(clave.getBytes(), "AES");
+                SecretKeySpec secretKeySpec = generateKey();
+                try {
+                    byte[] passEncrypted;
+                    passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
+                    Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
+                    String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
+                    Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
+                    createAccount(email.getText().toString() , pass.getText().toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage() + "  error", Toast.LENGTH_LONG).show();
+                }
+            }
+            else Toast.makeText(getApplicationContext(), "Las contraseñas no coinciden", Toast.LENGTH_LONG).show();
+
+        } else {
+            Toast.makeText(getApplicationContext(), "Rellene todos los campos", Toast.LENGTH_LONG).show();
+        }
     }
 }

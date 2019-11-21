@@ -27,13 +27,14 @@
         android:ems="10"
         android:hint="Password"
         android:inputType="textPassword"
+        android:text="QAZ12345"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.655"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextUser" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextEmail" />
 
     <EditText
-        android:id="@+id/editTextUser"
+        android:id="@+id/editTextEmail"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="112dp"
@@ -41,7 +42,8 @@
         android:layout_marginEnd="92dp"
         android:ems="10"
         android:hint="User"
-        android:inputType="textPersonName"
+        android:inputType="textEmailAddress"
+        android:text="fredgonz7@gmail.com"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.612"
         app:layout_constraintStart_toStartOf="parent"
