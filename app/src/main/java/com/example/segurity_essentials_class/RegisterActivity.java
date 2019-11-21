@@ -58,14 +58,14 @@ public class RegisterActivity extends AppCompatActivity {
 
         //Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-        final FirebaseUser currentUser = mAuth.getCurrentUser();
+        //FirebaseUser currentUser = mAuth.getCurrentUser();
+        //updateUI(currentUser);
 
         email = findViewById(R.id.editTextEmail);
         pass = findViewById(R.id.editTextPass);
         conpass = findViewById(R.id.editTextPassCon);
         register = findViewById(R.id.buttonRegister);
         login = findViewById(R.id.textLogin);
-
 
         //findViewById(R.id.buttonRegister).setOnClickListener((View.OnClickListener) this);
 
@@ -75,13 +75,15 @@ public class RegisterActivity extends AppCompatActivity {
                 if (validateForm()) {
                     //Toast.makeText(getApplicationContext(), "Las claves coinciden", Toast.LENGTH_LONG).show();
                     if (validatePass()){
-                        secretKeySpec = new SecretKeySpec(clave.getBytes(), "AES");
+                        //secretKeySpec = new SecretKeySpec(clave.getBytes(), "AES");
+                        secretKeySpec = generateKey();
                         try {
                             byte[] passEncrypted;
                             passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
                             Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
                             String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
                             Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
+                            //createAccount(email.getText().toString() , pass.getText().toString());
                         } catch (Exception e) {
                             e.printStackTrace();
                             Toast.makeText(getApplicationContext(), e.getLocalizedMessage() + "  error", Toast.LENGTH_LONG).show();
@@ -92,57 +94,35 @@ public class RegisterActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(getApplicationContext(), "Rellene todos los campos", Toast.LENGTH_LONG).show();
                 }
-
             }
         });
     }
-    /*
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
-    }*/
 
-    private void createAccount(String email, String password) {
-        //Log.d("TAG", "createAccount:" + email);
+    private void createAccount(String emailCreate, String passwordCreate) {
+        Toast.makeText(RegisterActivity.this, emailCreate+" - "+passwordCreate, Toast.LENGTH_SHORT).show();
         if (!validateForm()) {
-            //return;
             Toast.makeText(getApplicationContext(), "Revise los datos", Toast.LENGTH_LONG).show();
+            return;
         }
-
-        //showProgressDialog();
-
-        // [START create_user_with_email]
-        mAuth.createUserWithEmailAndPassword(email, password)
+        mAuth.createUserWithEmailAndPassword(emailCreate, passwordCreate)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        Toast.makeText(RegisterActivity.this, "OnComplete", Toast.LENGTH_SHORT).show();
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            //Log.d("TAG", "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            //updateUI(user);
+                            Toast.makeText(RegisterActivity.this, "Authentication exist.", Toast.LENGTH_SHORT).show();
                         } else {
                             // If sign in fails, display a message to the user.
-                            //Log.d("TAG", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
-
-                        // [START_EXCLUDE]
-                        //hideProgressDialog();
-                        // [END_EXCLUDE]
                     }
-                });
-        // [END create_user_with_email]
-
+        });
     }
     /*
     private void updateUI(FirebaseUser user) {
-        hideProgressDialog();
+        //hideProgressDialog();
         if (user != null) {
             mStatusTextView.setText(getString(R.string.emailpassword_status_fmt,
                     user.getEmail(), user.isEmailVerified()));
@@ -161,12 +141,12 @@ public class RegisterActivity extends AppCompatActivity {
             findViewById(R.id.emailPasswordFields).setVisibility(View.VISIBLE);
             findViewById(R.id.signedInButtons).setVisibility(View.GONE);
         }
-    }*/
+    }
+    */
 
-    /*
-    public static SecretKey generateKey() throws NoSuchAlgorithmException, InvalidKeyException {
-        return secret = new SecretKeySpec(clave.getBytes(), "AES");
-    }Arrays.toString(byteArr)*/
+    public SecretKeySpec generateKey() {
+        return new SecretKeySpec(clave.getBytes(), "AES");
+    }
     
     //public String encryptMsg(String message, SecretKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
     public byte[] encryptMsg(String message, SecretKey key) throws Exception {
@@ -182,39 +162,6 @@ public class RegisterActivity extends AppCompatActivity {
         cipher.init(Cipher.DECRYPT_MODE, secret);
         return new String(cipher.doFinal(cipherText), StandardCharsets.UTF_8);
     }
-    /*
-    public static String registrarUsuario(FirebaseUser currentUser,String email, String password){
-
-        if (currentUser != null){
-
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d(TAG, "createUserWithEmail:success");
-                                FirebaseUser user = mAuth.getCurrentUser();
-                                updateUI(user);
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                Toast.makeText(EmailPasswordActivity.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-                                updateUI(null);
-                            }
-
-                            // ...
-                        }
-                    });
-
-
-        }
-        else {
-            return "error";
-        }
-    }*/
-
 
     private boolean validateForm() {
         boolean valid = true;
@@ -259,5 +206,4 @@ public class RegisterActivity extends AppCompatActivity {
         }
         return valid;
     }
-
 }

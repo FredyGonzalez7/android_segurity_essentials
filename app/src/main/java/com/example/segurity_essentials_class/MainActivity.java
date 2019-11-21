@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this,RegisterActivity.class));
             }
         });
+        startActivity(new Intent(MainActivity.this,RegisterActivity.class));
     }
 
     //public static SecretKey generateKey()
