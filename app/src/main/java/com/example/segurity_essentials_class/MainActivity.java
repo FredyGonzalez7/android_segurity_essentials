@@ -19,17 +19,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.Arrays;
-
-import javax.crypto.spec.SecretKeySpec;
-
 public class MainActivity extends AppCompatActivity {
-    //private static SecretKeySpec secret;
     EditText email, pass;
     TextView register;
     Button login;
-    static String clave = "";
-    //static var clave="";//kotlin
     private FirebaseAuth firebaseAuth;
 
     @Override
@@ -44,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
-        //FirebaseUser currentUser = mAuth.getCurrentUser();
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        signOut();
+        //signOut();
+        informationUser();
     }
 
     private void signIn(String emailSignIn, String passwordSignIn){
@@ -72,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("signIn", "signInWithEmail:success");
                             //FirebaseUser user = firebaseAuth.getCurrentUser();
-                            informationUser();
+                            startActivity(new Intent(MainActivity.this, HomeActivity.class));
                             //updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -104,8 +97,9 @@ public class MainActivity extends AppCompatActivity {
     private void informationUser(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
+            startActivity(new Intent(MainActivity.this, HomeActivity.class));
             // Name, email address, and profile photo Url
-            String name = user.getDisplayName();
+            /*String name = user.getDisplayName();
             String email = user.getEmail();
             //Uri photoUrl = user.getPhotoUrl();
             Toast.makeText(MainActivity.this, email ,Toast.LENGTH_SHORT).show();
@@ -118,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             // authenticate with your backend server, if you have one. Use
             // FirebaseUser.getIdToken() instead.
             //String uid = user.getUid();
+            */
         }
         else {
             Log.d("user null", "loginUser: null");
