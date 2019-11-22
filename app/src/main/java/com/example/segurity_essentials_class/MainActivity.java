@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //startActivity(new Intent(MainActivity.this,HomeActivity.class));
                 loginUser();
             }
         });
@@ -51,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this,RegisterActivity.class));
             }
         });
-
-        //signOut();
         informationUser();
     }
 
@@ -64,18 +61,13 @@ public class MainActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("signIn", "signInWithEmail:success");
-                            //FirebaseUser user = firebaseAuth.getCurrentUser();
                             startActivity(new Intent(MainActivity.this, HomeActivity.class));
-                            //updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             //Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
-                            //updateUI(null);
                         }
-
-                        // ...
                     }
                 });
     }
@@ -90,10 +82,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Rellene todos los campos", Toast.LENGTH_LONG).show();
         }
     }
+    /*
     private void signOut() {
         firebaseAuth.signOut();
-        //updateUI(null);
-    }
+    }*/
     private void informationUser(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {

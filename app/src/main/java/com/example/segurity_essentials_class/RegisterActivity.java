@@ -37,9 +37,8 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText email;
     private EditText pass;
     private EditText conpass;
-    private TextView login;
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -47,17 +46,13 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         //Initialize Firebase Auth
-        mAuth = FirebaseAuth.getInstance();
-        //FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
+        firebaseAuth = FirebaseAuth.getInstance();
 
         email = findViewById(R.id.editTextEmail);
         pass = findViewById(R.id.editTextPass);
         conpass = findViewById(R.id.editTextPassCon);
         register = findViewById(R.id.buttonRegister);
-        login = findViewById(R.id.textLogin);
-
-        //findViewById(R.id.buttonRegister).setOnClickListener((View.OnClickListener) this);
+        TextView login = findViewById(R.id.textLogin);
 
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,18 +64,14 @@ public class RegisterActivity extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(RegisterActivity.this,MainActivity.class));
+                goToMainActivity();
             }
         });
     }
 
     private void createAccount(String emailCreate, String passwordCreate) {
-        /*Toast.makeText(RegisterActivity.this, emailCreate+" - "+passwordCreate, Toast.LENGTH_SHORT).show();
-        if (!validateForm()) {
-            Toast.makeText(getApplicationContext(), "Revise los datos", Toast.LENGTH_LONG).show();
-            return;
-        }*/
-        mAuth.createUserWithEmailAndPassword(emailCreate, passwordCreate)
+
+        firebaseAuth.createUserWithEmailAndPassword(emailCreate, passwordCreate)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -88,14 +79,17 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(RegisterActivity.this, "Authentication exist.", Toast.LENGTH_SHORT).show();
-
+                            goToMainActivity();
                         } else {
                             // If sign in fails, display a message to the user.
+                            // verificar si el usuario existe
                             Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                            //updateUI(null);
                         }
                     }
         });
+    }
+    private void goToMainActivity(){
+        startActivity(new Intent(RegisterActivity.this,MainActivity.class));
     }
     /*
     private void updateUI(FirebaseUser user) {
@@ -167,7 +161,7 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             conpass.setError(null);
         }
-        //validar que las password tenga por lo menos 6 caracteres
+
         return valid;
     }
 
@@ -187,17 +181,18 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser(){
+        // String emailText = email.getText().toString().trim();
+
         if (validateForm()) {
-            //Toast.makeText(getApplicationContext(), "Las claves coinciden", Toast.LENGTH_LONG).show();
             if (validatePass()){
                 //secretKeySpec = new SecretKeySpec(clave.getBytes(), "AES");
                 SecretKeySpec secretKeySpec = generateKey();
                 try {
                     byte[] passEncrypted;
                     passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
-                    Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
                     String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
-                    Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
                     createAccount(email.getText().toString() , pass.getText().toString());
                 } catch (Exception e) {
                     e.printStackTrace();
