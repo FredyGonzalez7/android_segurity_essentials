@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -79,6 +80,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(RegisterActivity.this, "Authentication exist.", Toast.LENGTH_SHORT).show();
+                            signOut();
                             goToMainActivity();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -87,6 +89,10 @@ public class RegisterActivity extends AppCompatActivity {
                         }
                     }
         });
+    }
+
+    private void signOut() {
+        firebaseAuth.signOut();
     }
     private void goToMainActivity(){
         startActivity(new Intent(RegisterActivity.this,MainActivity.class));
@@ -191,7 +197,9 @@ public class RegisterActivity extends AppCompatActivity {
                     byte[] passEncrypted;
                     passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
                     //Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
+                    Log.d("passEncryp", "registerUser: "+ Arrays.toString(passEncrypted));
                     String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
+                    Log.d("passDecrecryp", "registerUser: "+passDecrypted);
                     //Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
                     createAccount(email.getText().toString() , pass.getText().toString());
                 } catch (Exception e) {
