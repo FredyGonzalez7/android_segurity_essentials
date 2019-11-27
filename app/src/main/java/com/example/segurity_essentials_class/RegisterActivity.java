@@ -18,12 +18,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -39,15 +43,18 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText pass;
     private EditText conpass;
 
+    // Firebase
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference database;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        //Initialize Firebase Auth
+        //Initialize Firebase
         firebaseAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance().getReference();
 
         email = findViewById(R.id.editTextEmail);
         pass = findViewById(R.id.editTextPass);
@@ -70,7 +77,7 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-    private void createAccount(String emailCreate, String passwordCreate) {
+    private void createAccount(final String emailCreate, String passwordCreate) {
 
         firebaseAuth.createUserWithEmailAndPassword(emailCreate, passwordCreate)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -78,17 +85,46 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Toast.makeText(RegisterActivity.this, "OnComplete", Toast.LENGTH_SHORT).show();
                         if (task.isSuccessful()) {
+                            onAuthSuccess(Objects.requireNonNull(Objects.requireNonNull(task.getResult()).getUser()));
                             // Sign in success, update UI with the signed-in user's information
-                            Toast.makeText(RegisterActivity.this, "Authentication exist.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterActivity.this, "Register exist.", Toast.LENGTH_SHORT).show();
+                            //Log.d("uid", "onComplete: "+firebaseAuth.getUid());
+                            //Log.d("email", "onComplete: "+task.getResult().getUser().getEmail());
+                            //writeNewUser(firebaseAuth.getUid(),task.getResult().getUser().getEmail(),firebaseAuth.getUid());
                             signOut();
                             goToMainActivity();
                         } else {
                             // If sign in fails, display a message to the user.
                             // verificar si el usuario existe
-                            Toast.makeText(RegisterActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RegisterActivity.this, "Register failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
         });
+    }
+
+    private void onAuthSuccess(FirebaseUser firebaseUser) {
+
+        //database = FirebaseDatabase.getInstance().getReference();
+        // Write new user
+        writeNewUser(firebaseUser.getUid(), firebaseUser.getEmail(), firebaseUser.getUid());
+        // Go to MainActivity
+        //startActivity(new Intent(SignInActivity.this, MainActivity.class));
+
+    }
+
+    private void writeNewUser(String userId, String email, String uid) {
+        /*FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            User user = new User(email, uid);
+            databaseReference.child("user").child(userId).setValue(user);
+        } else {
+            Log.d("user", "loginUser: null");
+            startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+        }*/
+        User user = new User(email, uid);
+
+        //DatabaseReference databaseReference = database.getReference();
+        database.child("user").child(userId).setValue(user);
     }
 
     private void signOut() {
