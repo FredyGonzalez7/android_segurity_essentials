@@ -1,5 +1,6 @@
 package com.example.segurity_essentials_class;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -22,8 +23,16 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONObject;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -33,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
     Button salvar;
 
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +53,10 @@ public class HomeActivity extends AppCompatActivity {
         email = findViewById(R.id.textViewEmail);
         latLong = findViewById(R.id.textViewLatLong);
         signOut = findViewById(R.id.textViewSignOut);
+        salvar = findViewById(R.id.buttonSalvar);
 
         firebaseAuth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance().getReference();
 
         signOut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,6 +66,13 @@ public class HomeActivity extends AppCompatActivity {
                 email.setText("");
                 latLong.setText("");
                 startActivity(new Intent(HomeActivity.this, MainActivity.class));
+            }
+        });
+
+        salvar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                informationUser();
             }
         });
 
@@ -105,14 +124,34 @@ public class HomeActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void informationUser() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            if (Objects.equals(user.getDisplayName(), "") || user.getDisplayName() == null) {
+        FirebaseUser userAuth = FirebaseAuth.getInstance().getCurrentUser();
+        if (userAuth != null) {
+            // verifica si el usuario de la sesion tiene nombre, en caso de estar registrado por google...
+            /*
+            if (Objects.equals(userAuth.getDisplayName(), "") || userAuth.getDisplayName() == null) {
+
                 nombres.setText("Unregistered names");
-            } else {
-                nombres.setText(user.getDisplayName());
             }
-            email.setText(user.getEmail());
+            else {
+                nombres.setText(userAuth.getDisplayName());
+            }
+            */
+            database.child("user").child(userAuth.getUid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        User user =  dataSnapshot.getValue(User.class);
+                        assert user != null;
+                        nombres.setText(user.getName());
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        nombres.setText("Unregistered names");
+                    }
+                });
+
+            email.setText(userAuth.getEmail());
         } else {
             Log.d("user null", "loginUser: null");
             startActivity(new Intent(HomeActivity.this, MainActivity.class));

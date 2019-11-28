@@ -42,6 +42,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText email;
     private EditText pass;
     private EditText conpass;
+    private EditText name;
 
     // Firebase
     private FirebaseAuth firebaseAuth;
@@ -59,6 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
         email = findViewById(R.id.editTextEmail);
         pass = findViewById(R.id.editTextPass);
         conpass = findViewById(R.id.editTextPassCon);
+        name = findViewById(R.id.editTextName);
         register = findViewById(R.id.buttonRegister);
         TextView login = findViewById(R.id.textLogin);
 
@@ -104,15 +106,15 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void onAuthSuccess(FirebaseUser firebaseUser) {
 
-        //database = FirebaseDatabase.getInstance().getReference();
+        String localName = name.getText().toString();
         // Write new user
-        writeNewUser(firebaseUser.getUid(), firebaseUser.getEmail(), firebaseUser.getUid());
+        writeNewUser(firebaseUser.getUid(), firebaseUser.getEmail(), firebaseUser.getUid(), localName);
         // Go to MainActivity
         //startActivity(new Intent(SignInActivity.this, MainActivity.class));
 
     }
 
-    private void writeNewUser(String userId, String email, String uid) {
+    private void writeNewUser(String userId, String email, String uid, String name) {
         /*FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             User user = new User(email, uid);
@@ -121,7 +123,7 @@ public class RegisterActivity extends AppCompatActivity {
             Log.d("user", "loginUser: null");
             startActivity(new Intent(RegisterActivity.this, MainActivity.class));
         }*/
-        User user = new User(email, uid);
+        User user = new User(email, uid, name);
 
         //DatabaseReference databaseReference = database.getReference();
         database.child("user").child(userId).setValue(user);
@@ -188,20 +190,28 @@ public class RegisterActivity extends AppCompatActivity {
             email.setError(null);
         }
 
-        String password = pass.getText().toString();
-        if (TextUtils.isEmpty(password)) {
+        String localPassword = pass.getText().toString();
+        if (TextUtils.isEmpty(localPassword)) {
             pass.setError("Required.");
             valid = false;
         } else {
             pass.setError(null);
         }
 
-        String confirmPassword = conpass.getText().toString();
-        if (TextUtils.isEmpty(confirmPassword)) {
+        String localConfirmPassword = conpass.getText().toString();
+        if (TextUtils.isEmpty(localConfirmPassword)) {
             conpass.setError("Required.");
             valid = false;
         } else {
             conpass.setError(null);
+        }
+
+        String localName = name.getText().toString();
+        if (TextUtils.isEmpty(localName)) {
+            name.setError("Required.");
+            valid = false;
+        } else {
+            name.setError(null);
         }
 
         return valid;
