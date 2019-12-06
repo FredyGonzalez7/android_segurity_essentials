@@ -21,10 +21,8 @@ public class User {
     public String getName() {
         return name;
     }
+
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
-
-
-
 }

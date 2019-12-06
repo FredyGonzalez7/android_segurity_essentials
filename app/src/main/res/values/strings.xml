@@ -1,4 +1,15 @@
 <resources>
-    <string name="app_name">Segurity_Essentials_Class</string>
+    <string name="app_name">Security_Essentials_Class</string>
     <string name="title_activity_register">RegisterActivity</string>
+    <string name="register">Register</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="name">Name</string>
+    <string name="user">User</string>
+    <string name="home">Home</string>
+    <string name="lat_long">Lat, Long</string>
+    <string name="salvar">Salvar</string>
+    <string name="signout">signOut</string>
 </resources>

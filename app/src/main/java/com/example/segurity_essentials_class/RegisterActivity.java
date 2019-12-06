@@ -41,7 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
     Button register;
     private EditText email;
     private EditText pass;
-    private EditText conpass;
+    private EditText compass;
     private EditText name;
 
     // Firebase
@@ -59,7 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         email = findViewById(R.id.editTextEmail);
         pass = findViewById(R.id.editTextPass);
-        conpass = findViewById(R.id.editTextPassCon);
+        compass = findViewById(R.id.editTextPassCon);
         name = findViewById(R.id.editTextName);
         register = findViewById(R.id.buttonRegister);
         TextView login = findViewById(R.id.textLogin);
@@ -195,15 +195,25 @@ public class RegisterActivity extends AppCompatActivity {
             pass.setError("Required.");
             valid = false;
         } else {
-            pass.setError(null);
+            if (localPassword.length()<6) {
+                pass.setError("Minimum 5 digits required.");
+                valid = false;
+            } else {
+                pass.setError(null);
+            }
         }
 
-        String localConfirmPassword = conpass.getText().toString();
+        String localConfirmPassword = compass.getText().toString();
         if (TextUtils.isEmpty(localConfirmPassword)) {
-            conpass.setError("Required.");
+            compass.setError("Required.");
             valid = false;
         } else {
-            conpass.setError(null);
+            if (localConfirmPassword.length()<6) {
+                compass.setError("Minimum 5 digits required.");
+                valid = false;
+            } else {
+                compass.setError(null);
+            }
         }
 
         String localName = name.getText().toString();
@@ -213,21 +223,20 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             name.setError(null);
         }
-
         return valid;
     }
 
     private boolean validatePass(){
         boolean valid = true;
         String password = pass.getText().toString();
-        String confirmPassword = conpass.getText().toString();
+        String confirmPassword = compass.getText().toString();
         if (!password.equals(confirmPassword)) {
             pass.setError("Required.");
-            conpass.setError("Required.");
+            compass.setError("Required.");
             valid = false;
         } else {
             pass.setError(null);
-            conpass.setError(null);
+            compass.setError(null);
         }
         return valid;
     }
@@ -237,9 +246,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         if (validateForm()) {
             if (validatePass()){
-                //secretKeySpec = new SecretKeySpec(clave.getBytes(), "AES");
-                SecretKeySpec secretKeySpec = generateKey();
                 try {
+                    SecretKeySpec secretKeySpec = generateKey();
                     byte[] passEncrypted;
                     passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
                     //Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();

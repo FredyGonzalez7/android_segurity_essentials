@@ -13,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -158,6 +157,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void setLatLong() {
         // Acquire a reference to the system Location Manager
         Log.d("dentro", "setLatLong: ");
@@ -168,7 +168,7 @@ public class HomeActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             public void onLocationChanged(Location location) {
                 // Called when a new location is found by the network location provider.
-                latLong.setText("Lat: "+location.getLatitude()+" - Long: "+location.getLongitude());
+                latLong.setText("Lat:"+location.getLatitude()+" - Long:"+location.getLongitude());
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
