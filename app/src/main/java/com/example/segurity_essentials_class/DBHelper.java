@@ -52,7 +52,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if (getUser(context,email)==null){
             /*ContentValues contentValues = new ContentValues();
-            //contentValues.put(COLUMN_ID, uid);
             contentValues.put(COLUMN_EMAIL, email);
             contentValues.put(COLUMN_NAME, name);
             contentValues.put(COLUMN_UID, uid);
@@ -67,7 +66,7 @@ public class DBHelper extends SQLiteOpenHelper {
             Log.d(TAG, "insertRow: query " + query);
             db.execSQL(query);
             db.close();
-            return "Usuario registrado";
+            return "User Register";
         }
         else return null;
     }

@@ -20,9 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
-    EditText email, pass;
-    TextView register;
-    Button login;
+    private EditText email, pass;
     private FirebaseAuth firebaseAuth;
 
     @Override
@@ -32,8 +30,9 @@ public class MainActivity extends AppCompatActivity {
 
         email = findViewById(R.id.editTextEmail);
         pass = findViewById(R.id.editTextPass);
-        register = findViewById(R.id.textRegister);
-        login = findViewById(R.id.buttonLogin);
+
+        TextView register = findViewById(R.id.textRegister);
+        Button login = findViewById(R.id.buttonLogin);
 
         // Initialize Firebase Auth
         firebaseAuth = FirebaseAuth.getInstance();
@@ -60,11 +59,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d("signIn", "signInWithEmail:success");
+                            // Log.d("signIn", "signInWithEmail:success");
                             startActivity(new Intent(MainActivity.this, HomeActivity.class));
                         } else {
                             // If sign in fails, display a message to the user.
-                            //Log.w(TAG, "signInWithEmail:failure", task.getException());
+                            // Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -73,38 +72,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginUser(){
-        //Log.d("void", "loginUser: pre-validate");
         if (validateForm()) {
-            //Log.d("if", "loginUser: validate");
             signIn(email.getText().toString().trim(),pass.getText().toString().trim());
 
         } else {
-            Toast.makeText(MainActivity.this, "Rellene todos los campos", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "All fields are required", Toast.LENGTH_LONG).show();
         }
     }
-    /*
-    private void signOut() {
-        firebaseAuth.signOut();
-    }*/
     private void informationUser(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             startActivity(new Intent(MainActivity.this, HomeActivity.class));
-            // Name, email address, and profile photo Url
-            /*String name = user.getDisplayName();
-            String email = user.getEmail();
-            //Uri photoUrl = user.getPhotoUrl();
-            Toast.makeText(MainActivity.this, email ,Toast.LENGTH_SHORT).show();
-            // Check if user's email is verified
-            //boolean emailVerified = user.isEmailVerified();
-            if (user.isEmailVerified()){
-                Log.d("user", "informationUser: if");
-            }
-            // The user's ID, unique to the Firebase project. Do NOT use this value to
-            // authenticate with your backend server, if you have one. Use
-            // FirebaseUser.getIdToken() instead.
-            //String uid = user.getUid();
-            */
         }
         else {
             Log.d("user null", "loginUser: null");
@@ -128,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             pass.setError(null);
         }
-        //validar que las password tenga por lo menos 6 caracteres
+        // No validar el numero de caracteres de la password en la autenticacion
         return valid;
     }
 }

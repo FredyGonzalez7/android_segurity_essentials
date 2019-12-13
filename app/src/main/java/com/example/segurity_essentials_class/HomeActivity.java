@@ -28,20 +28,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONObject;
-
-import java.time.Instant;
-import java.util.Map;
-import java.util.Objects;
-
-
 public class HomeActivity extends AppCompatActivity {
 
-    TextView signOut, email, nombres, latLong;
-    Button salvar;
+    private TextView email, nombres, latLong;
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference database;
+
+    private static String TAG = "Fredy";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +45,7 @@ public class HomeActivity extends AppCompatActivity {
         nombres = findViewById(R.id.textViewNombres);
         email = findViewById(R.id.textViewEmail);
         latLong = findViewById(R.id.textViewLatLong);
-        signOut = findViewById(R.id.textViewSignOut);
-        salvar = findViewById(R.id.buttonSalvar);
+        Button signOut = findViewById(R.id.buttonSignOut);
 
         firebaseAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance().getReference();
@@ -64,14 +57,7 @@ public class HomeActivity extends AppCompatActivity {
                 nombres.setText("");
                 email.setText("");
                 latLong.setText("");
-                startActivity(new Intent(HomeActivity.this, MainActivity.class));
-            }
-        });
-
-        salvar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                informationUser();
+                goToMainActivity();
             }
         });
 
@@ -82,11 +68,8 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        // verificar si hay un currentUser
         informationUser();
         permissionLocation();
-        setLatLong();
-
     }
 
     private void permissionLocation() {
@@ -113,14 +96,12 @@ public class HomeActivity extends AppCompatActivity {
             }
         } else {
             // Permission has already been granted
-            Log.d("permiso else", "onCreate: permission has already");
+            setLatLong();
         }
     }
 
-
-    private void signOut() {
-        firebaseAuth.signOut();
-    }
+    private void signOut() { firebaseAuth.signOut(); }
+    private void goToMainActivity(){ startActivity(new Intent(HomeActivity.this,MainActivity.class)); }
 
     @SuppressLint("SetTextI18n")
     private void informationUser() {
@@ -150,7 +131,6 @@ public class HomeActivity extends AppCompatActivity {
                         nombres.setText("Unregistered names");
                     }
                 });
-
             email.setText(userAuth.getEmail());
             DBHelper dbHelper = new DBHelper(getApplicationContext());
             String nameUserDBLocal = dbHelper.getUser(getApplicationContext(),userAuth.getEmail());

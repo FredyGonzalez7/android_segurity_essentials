@@ -38,15 +38,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    Button register;
     private EditText email;
     private EditText pass;
     private EditText compass;
     private EditText name;
 
-    // Firebase
     private FirebaseAuth firebaseAuth;
     private DatabaseReference database;
+
+    private static String TAG = "Fredy";
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -61,7 +61,8 @@ public class RegisterActivity extends AppCompatActivity {
         pass = findViewById(R.id.editTextPass);
         compass = findViewById(R.id.editTextPassCon);
         name = findViewById(R.id.editTextName);
-        register = findViewById(R.id.buttonRegister);
+
+        Button register = findViewById(R.id.buttonRegister);
         TextView login = findViewById(R.id.textLogin);
 
         register.setOnClickListener(new View.OnClickListener() {
@@ -80,21 +81,15 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void createAccount(final String emailCreate, String passwordCreate) {
-
         firebaseAuth.createUserWithEmailAndPassword(emailCreate, passwordCreate)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // registrar en la DBRealTime
+                            // registrar en la DBRealTime y en la DBLocal
                             onAuthSuccess(Objects.requireNonNull(Objects.requireNonNull(task.getResult()).getUser()));
-                            // registrar en la DBLocal
-
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(RegisterActivity.this, "Register exist.", Toast.LENGTH_SHORT).show();
-                            //Log.d("uid", "onComplete: "+firebaseAuth.getUid());
-                            //Log.d("email", "onComplete: "+task.getResult().getUser().getEmail());
-                            //writeNewUser(firebaseAuth.getUid(),task.getResult().getUser().getEmail(),firebaseAuth.getUid());
                             signOut();
                             goToMainActivity();
                         } else {
@@ -108,58 +103,30 @@ public class RegisterActivity extends AppCompatActivity {
 
     //registrar en la DBRealTime y en DBLocal
     private void onAuthSuccess(FirebaseUser firebaseUser) {
-
         String localName = name.getText().toString();
         // Write new user
         writeNewUser(firebaseUser.getUid(), firebaseUser.getEmail(), firebaseUser.getUid(), localName);
         registerLocalUser(firebaseUser.getEmail(), localName, firebaseUser.getUid());
     }
-
+    // registrar en la DBRealTime
     private void writeNewUser(String userId, String email, String uid, String name) {
         User user = new User(email, uid, name);
         //DatabaseReference databaseReference = database.getReference();
         database.child("user").child(userId).setValue(user);
     }
-
+    // registrar en la DBLocal
     private void registerLocalUser(String email,String name, String uid){
         DBHelper dbHelper = new DBHelper(getApplicationContext());
-        String respuestaInsert = dbHelper.insertRow(getApplicationContext(),uid,email, name);
-        Log.d("Fredy", "onCreate: insert "+respuestaInsert);
+        String responseInsert = dbHelper.insertRow(getApplicationContext(),uid,email, name);
+        Log.d(TAG, "onCreate: insert "+responseInsert);
     }
 
-    private void signOut() {
-        firebaseAuth.signOut();
-    }
-    private void goToMainActivity(){
-        startActivity(new Intent(RegisterActivity.this,MainActivity.class));
-    }
-    /*
-    private void updateUI(FirebaseUser user) {
-        //hideProgressDialog();
-        if (user != null) {
-            mStatusTextView.setText(getString(R.string.emailpassword_status_fmt,
-                    user.getEmail(), user.isEmailVerified()));
-            mDetailTextView.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
-            findViewById(R.id.emailPasswordButtons).setVisibility(View.GONE);
-            findViewById(R.id.emailPasswordFields).setVisibility(View.GONE);
-            findViewById(R.id.signedInButtons).setVisibility(View.VISIBLE);
-
-            findViewById(R.id.verifyEmailButton).setEnabled(!user.isEmailVerified());
-        } else {
-            mStatusTextView.setText(R.string.signed_out);
-            mDetailTextView.setText(null);
-
-            findViewById(R.id.emailPasswordButtons).setVisibility(View.VISIBLE);
-            findViewById(R.id.emailPasswordFields).setVisibility(View.VISIBLE);
-            findViewById(R.id.signedInButtons).setVisibility(View.GONE);
-        }
-    }
-    */
+    private void signOut() { firebaseAuth.signOut(); }
+    private void goToMainActivity(){ startActivity(new Intent(RegisterActivity.this,MainActivity.class)); }
 
     public SecretKeySpec generateKey() {
-        String clave = "fredy david gonz";
-        return new SecretKeySpec(clave.getBytes(), "AES");
+        String key = "fredy david gonz";
+        return new SecretKeySpec(key.getBytes(), "AES");
     }
     
     //public String encryptMsg(String message, SecretKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
@@ -188,26 +155,26 @@ public class RegisterActivity extends AppCompatActivity {
             email.setError(null);
         }
 
-        String localPassword = pass.getText().toString();
+        String localPassword = pass.getText().toString().trim();
         if (TextUtils.isEmpty(localPassword)) {
             pass.setError("Required.");
             valid = false;
         } else {
             if (localPassword.length()<6) {
-                pass.setError("Minimum 5 digits required.");
+                pass.setError("Minimum 6 digits required.");
                 valid = false;
             } else {
                 pass.setError(null);
             }
         }
 
-        String localConfirmPassword = compass.getText().toString();
+        String localConfirmPassword = compass.getText().toString().trim();
         if (TextUtils.isEmpty(localConfirmPassword)) {
             compass.setError("Required.");
             valid = false;
         } else {
             if (localConfirmPassword.length()<6) {
-                compass.setError("Minimum 5 digits required.");
+                compass.setError("Minimum 6 digits required.");
                 valid = false;
             } else {
                 compass.setError(null);
@@ -240,8 +207,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void registerUser(){
-        // String emailText = email.getText().toString().trim();
-
         if (validateForm()) {
             if (validatePass()){
                 try {
@@ -249,20 +214,20 @@ public class RegisterActivity extends AppCompatActivity {
                     byte[] passEncrypted;
                     passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
                     //Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
-                    Log.d("passEncryp", "registerUser: "+ Arrays.toString(passEncrypted));
+                    Log.d(TAG, "registerUser: passEncryp "+ Arrays.toString(passEncrypted));
                     String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
-                    Log.d("passDecrecryp", "registerUser: "+passDecrypted);
+                    Log.d(TAG, "registerUser: passDecrecryp "+passDecrypted);
                     //Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
-                    createAccount(email.getText().toString() , pass.getText().toString());
+                    createAccount(email.getText().toString().trim() , pass.getText().toString().trim());
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage() + "  error", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                 }
             }
-            else Toast.makeText(getApplicationContext(), "Las contraseñas no coinciden", Toast.LENGTH_LONG).show();
+            else Toast.makeText(getApplicationContext(), "Passwords do not match", Toast.LENGTH_LONG).show();
 
         } else {
-            Toast.makeText(getApplicationContext(), "Rellene todos los campos", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "All fields are required", Toast.LENGTH_LONG).show();
         }
     }
 }
