@@ -86,6 +86,7 @@ public class HomeActivity extends AppCompatActivity {
         informationUser();
         permissionLocation();
         setLatLong();
+
     }
 
     private void permissionLocation() {
@@ -151,6 +152,9 @@ public class HomeActivity extends AppCompatActivity {
                 });
 
             email.setText(userAuth.getEmail());
+            DBHelper dbHelper = new DBHelper(getApplicationContext());
+            String nameUserDBLocal = dbHelper.getUser(getApplicationContext(),userAuth.getEmail());
+            Toast.makeText(HomeActivity.this, "User "+nameUserDBLocal+" - DBLocal",Toast.LENGTH_LONG).show();
         } else {
             Log.d("user null", "loginUser: null");
             startActivity(new Intent(HomeActivity.this, MainActivity.class));
@@ -190,8 +194,7 @@ public class HomeActivity extends AppCompatActivity {
         }
         else {
             latLong.setText("Unregistered Location");
-            Toast.makeText(HomeActivity.this, "Location access permission not enabled",
-                    Toast.LENGTH_SHORT).show();
+            //Toast.makeText(HomeActivity.this, "Location access permission not enabled",Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -85,9 +85,11 @@ public class RegisterActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Toast.makeText(RegisterActivity.this, "OnComplete", Toast.LENGTH_SHORT).show();
                         if (task.isSuccessful()) {
+                            // registrar en la DBRealTime
                             onAuthSuccess(Objects.requireNonNull(Objects.requireNonNull(task.getResult()).getUser()));
+                            // registrar en la DBLocal
+
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(RegisterActivity.this, "Register exist.", Toast.LENGTH_SHORT).show();
                             //Log.d("uid", "onComplete: "+firebaseAuth.getUid());
@@ -104,29 +106,25 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    //registrar en la DBRealTime y en DBLocal
     private void onAuthSuccess(FirebaseUser firebaseUser) {
 
         String localName = name.getText().toString();
         // Write new user
         writeNewUser(firebaseUser.getUid(), firebaseUser.getEmail(), firebaseUser.getUid(), localName);
-        // Go to MainActivity
-        //startActivity(new Intent(SignInActivity.this, MainActivity.class));
-
+        registerLocalUser(firebaseUser.getEmail(), localName, firebaseUser.getUid());
     }
 
     private void writeNewUser(String userId, String email, String uid, String name) {
-        /*FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            User user = new User(email, uid);
-            databaseReference.child("user").child(userId).setValue(user);
-        } else {
-            Log.d("user", "loginUser: null");
-            startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-        }*/
         User user = new User(email, uid, name);
-
         //DatabaseReference databaseReference = database.getReference();
         database.child("user").child(userId).setValue(user);
+    }
+
+    private void registerLocalUser(String email,String name, String uid){
+        DBHelper dbHelper = new DBHelper(getApplicationContext());
+        String respuestaInsert = dbHelper.insertRow(getApplicationContext(),uid,email, name);
+        Log.d("Fredy", "onCreate: insert "+respuestaInsert);
     }
 
     private void signOut() {
