@@ -15,8 +15,6 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_UID = "uid";
 
-    private static final String TAG = "Fredy";
-
     DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -42,7 +40,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS TABLE_NAME");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 
@@ -59,8 +57,7 @@ public class DBHelper extends SQLiteOpenHelper {
             db.insert(TABLE_NAME, null, contentValues);
             */
             SQLiteDatabase db = this.getWritableDatabase();
-            //String query = "INSERT INTO "+TABLE_NAME+" ("+COLUMN_EMAIL+", "+COLUMN_NAME+", "+COLUMN_UID+") VALUES ("+email+","+name+","+uid+")";
-            String query = "INSERT INTO user (email,name,uid) VALUES ('"+email+"','"+name+"','"+uid+"')";
+            String query = "INSERT INTO "+TABLE_NAME+" ("+COLUMN_EMAIL+","+COLUMN_NAME+","+COLUMN_UID+") VALUES ('"+email+"','"+name+"','"+uid+"')";
             db.execSQL(query);
             db.close();
             return "User Register";

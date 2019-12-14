@@ -74,34 +74,6 @@ public class HomeActivity extends AppCompatActivity {
         permissionLocation();
     }
 
-    private void permissionLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                setLatLong();
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        1);
-                // setLatLong();
-                // 1 identifica cuando termine la ejecucion
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {
-            // Permission has already been granted
-            setLatLong();
-        }
-    }
-
     private void signOut() { firebaseAuth.signOut(); }
     private void goToMainActivity(){ startActivity(new Intent(HomeActivity.this,MainActivity.class)); }
 
@@ -120,31 +92,58 @@ public class HomeActivity extends AppCompatActivity {
             }
             */
             database.child("user").child(userAuth.getUid()).addValueEventListener(new ValueEventListener() {
-                    @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        User user =  dataSnapshot.getValue(User.class);
-                        if (user != null) {
-                            nameDBRealTime.setText(user.getName());
-                            emailDBRealTime.setText(user.getEmail());
-                        }
-                        else {
-                            nameDBRealTime.setText("Unregistered names");
-                            emailDBRealTime.setText("Unregistered email");
-                        }
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    User user =  dataSnapshot.getValue(User.class);
+                    if (user != null) {
+                        nameDBRealTime.setText(user.getName());
+                        emailDBRealTime.setText(user.getEmail());
                     }
+                    else {
+                        nameDBRealTime.setText("Unregistered names");
+                        emailDBRealTime.setText("Unregistered email");
+                    }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        //error en con el usuerio en DBRealTime
-                        Log.d(TAG, "onCancelled: ");
-                    }
-                });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    //error en con el usuerio en DBRealTime
+                    Log.d(TAG, "onCancelled: ");
+                }
+            });
             DBHelper dbHelper = new DBHelper(getApplicationContext());
             String nameUserDBLocal = dbHelper.getUserName(getApplicationContext(),userAuth.getEmail());
             nameDBLocal.setText(nameUserDBLocal);
         } else {
             Log.d(TAG, "informationUser: No User");
             startActivity(new Intent(HomeActivity.this, MainActivity.class));
+        }
+    }
+
+    private void permissionLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+                setLatLong();
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+                // 1 identifica cuando termine la ejecucion
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+            setLatLong();
         }
     }
 

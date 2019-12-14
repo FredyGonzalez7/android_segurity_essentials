@@ -3,7 +3,6 @@ package com.example.segurity_essentials_class;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,19 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Objects;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -45,8 +32,6 @@ public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference database;
-
-    private static String TAG = "Fredy";
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -80,6 +65,26 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
+    private void registerUser() {
+        if (validateForm()) {
+            if (validatePass()) {
+                try {
+                    Encrypt encrypt = new Encrypt();
+                    String encryptMessage;
+                    encryptMessage = encrypt.encryptMsg(pass.getText().toString().trim(), encrypt.generateKey());
+                    createAccount(email.getText().toString().trim(), encryptMessage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
+            } else
+                Toast.makeText(getApplicationContext(), "Passwords do not match", Toast.LENGTH_LONG).show();
+
+        } else {
+            Toast.makeText(getApplicationContext(), "All fields are required", Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void createAccount(final String emailCreate, String passwordCreate) {
         firebaseAuth.createUserWithEmailAndPassword(emailCreate, passwordCreate)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -98,7 +103,7 @@ public class RegisterActivity extends AppCompatActivity {
                             Toast.makeText(RegisterActivity.this, "Register failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
-        });
+                });
     }
 
     //registrar en la DBRealTime y en DBLocal
@@ -108,40 +113,27 @@ public class RegisterActivity extends AppCompatActivity {
         writeNewUser(firebaseUser.getUid(), firebaseUser.getEmail(), firebaseUser.getUid(), localName);
         registerLocalUser(firebaseUser.getEmail(), localName, firebaseUser.getUid());
     }
+
     // registrar en la DBRealTime
     private void writeNewUser(String userId, String email, String uid, String name) {
         User user = new User(email, uid, name);
         //DatabaseReference databaseReference = database.getReference();
         database.child("user").child(userId).setValue(user);
     }
+
     // registrar en la DBLocal
-    private void registerLocalUser(String email,String name, String uid){
+    private void registerLocalUser(String email, String name, String uid) {
         DBHelper dbHelper = new DBHelper(getApplicationContext());
-        String responseInsert = dbHelper.insertRow(getApplicationContext(),uid,email, name);
-        Log.d(TAG, "onCreate: insert "+responseInsert);
+        String responseInsert = dbHelper.insertRow(getApplicationContext(), uid, email, name);
+        Log.d("Fredy", "onCreate: insert " + responseInsert);
     }
 
-    private void signOut() { firebaseAuth.signOut(); }
-    private void goToMainActivity(){ startActivity(new Intent(RegisterActivity.this,MainActivity.class)); }
-
-    public SecretKeySpec generateKey() {
-        String key = "fredy david gonz";
-        return new SecretKeySpec(key.getBytes(), "AES");
-    }
-    
-    //public String encryptMsg(String message, SecretKey key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, InvalidAlgorithmParameterException {
-    public byte[] encryptMsg(String message, SecretKey key) throws Exception {
-        @SuppressLint("GetInstance") Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
+    private void signOut() {
+        firebaseAuth.signOut();
     }
 
-    @SuppressLint("GetInstance")
-    public static String decryptMsg(byte[] cipherText, SecretKey secret) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterException, IllegalBlockSizeException, BadPaddingException {
-        Cipher cipher;
-        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, secret);
-        return new String(cipher.doFinal(cipherText), StandardCharsets.UTF_8);
+    private void goToMainActivity() {
+        startActivity(new Intent(RegisterActivity.this, MainActivity.class));
     }
 
     private boolean validateForm() {
@@ -160,7 +152,7 @@ public class RegisterActivity extends AppCompatActivity {
             pass.setError("Required.");
             valid = false;
         } else {
-            if (localPassword.length()<6) {
+            if (localPassword.length() < 6) {
                 pass.setError("Minimum 6 digits required.");
                 valid = false;
             } else {
@@ -173,7 +165,7 @@ public class RegisterActivity extends AppCompatActivity {
             compass.setError("Required.");
             valid = false;
         } else {
-            if (localConfirmPassword.length()<6) {
+            if (localConfirmPassword.length() < 6) {
                 compass.setError("Minimum 6 digits required.");
                 valid = false;
             } else {
@@ -191,7 +183,7 @@ public class RegisterActivity extends AppCompatActivity {
         return valid;
     }
 
-    private boolean validatePass(){
+    private boolean validatePass() {
         boolean valid = true;
         String password = pass.getText().toString();
         String confirmPassword = compass.getText().toString();
@@ -204,30 +196,5 @@ public class RegisterActivity extends AppCompatActivity {
             compass.setError(null);
         }
         return valid;
-    }
-
-    private void registerUser(){
-        if (validateForm()) {
-            if (validatePass()){
-                try {
-                    SecretKeySpec secretKeySpec = generateKey();
-                    byte[] passEncrypted;
-                    passEncrypted = encryptMsg(pass.getText().toString(), secretKeySpec);
-                    //Toast.makeText(getApplicationContext(), Arrays.toString(passEncrypted), Toast.LENGTH_LONG).show();
-                    Log.d(TAG, "registerUser: passEncryp "+ Arrays.toString(passEncrypted));
-                    String passDecrypted = decryptMsg(passEncrypted, secretKeySpec);
-                    Log.d(TAG, "registerUser: passDecrecryp "+passDecrypted);
-                    //Toast.makeText(getApplicationContext(), passDecrypted, Toast.LENGTH_LONG).show();
-                    createAccount(email.getText().toString().trim() , pass.getText().toString().trim());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                }
-            }
-            else Toast.makeText(getApplicationContext(), "Passwords do not match", Toast.LENGTH_LONG).show();
-
-        } else {
-            Toast.makeText(getApplicationContext(), "All fields are required", Toast.LENGTH_LONG).show();
-        }
     }
 }

@@ -73,7 +73,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void loginUser(){
         if (validateForm()) {
-            signIn(email.getText().toString().trim(),pass.getText().toString().trim());
+            try {
+                Encrypt encrypt = new Encrypt();
+                String encryptMessage = encrypt.encryptMsg(pass.getText().toString().trim(), encrypt.generateKey());
+                signIn(email.getText().toString().trim(),encryptMessage);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
 
         } else {
             Toast.makeText(MainActivity.this, "All fields are required", Toast.LENGTH_LONG).show();
