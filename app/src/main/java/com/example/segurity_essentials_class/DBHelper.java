@@ -18,24 +18,17 @@ public class DBHelper extends SQLiteOpenHelper {
     DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+    /*
     private DBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
-    }
+    }*/
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(
                 "CREATE TABLE "+TABLE_NAME+
-                        "("+COLUMN_ID +"INTEGER PRIMARY KEY, "+COLUMN_NAME+" TEXT, "+COLUMN_EMAIL+" TEXT, "+COLUMN_UID+" TEXT)"
+                        "("+COLUMN_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, "+COLUMN_NAME+" TEXT, "+COLUMN_EMAIL+" TEXT, "+COLUMN_UID+" TEXT)"
         );
-
-        /*
-        sqLiteDatabase.execSQL(
-                "CREATE TABLE " + TABLE_NAME +
-                        "(" + COLUMN_ID + " TEXT PRIMARY KEY, " + COLUMN_EMAIL +
-                        " TEXT," + COLUMN_NAME + " TEXT," + COLUMN_UID + " TEXT)"
-        );
-        */
     }
 
     @Override
@@ -67,7 +60,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     String getUserName(Context context, String email) {
         try {
-            DBHelper dbHelper = new DBHelper(context,DATABASE_NAME,null,DATABASE_VERSION);
+            DBHelper dbHelper = new DBHelper(context);
             SQLiteDatabase db = dbHelper.getReadableDatabase();
             String query ="SELECT "+COLUMN_EMAIL+","+COLUMN_NAME+" FROM " + TABLE_NAME + " WHERE "+COLUMN_EMAIL+" = '"+email+"'";
             Cursor cursor = db.rawQuery(query, null);
