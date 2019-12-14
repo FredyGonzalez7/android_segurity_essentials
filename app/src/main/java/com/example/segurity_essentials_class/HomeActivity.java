@@ -30,7 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private TextView email, nombres, latLong;
+    private TextView emailDBRealTime, nameDBRealTime, nameDBLocal, latLong;
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference database;
@@ -42,8 +42,9 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        nombres = findViewById(R.id.textViewNombres);
-        email = findViewById(R.id.textViewEmail);
+        nameDBRealTime = findViewById(R.id.textViewNameDBRealTime);
+        emailDBRealTime = findViewById(R.id.textViewEmailDBRealTime);
+        nameDBLocal = findViewById(R.id.textViewNameDBLocal);
         latLong = findViewById(R.id.textViewLatLong);
         Button signOut = findViewById(R.id.buttonSignOut);
 
@@ -54,8 +55,9 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 signOut();
-                nombres.setText("");
-                email.setText("");
+                nameDBRealTime.setText("");
+                emailDBRealTime.setText("");
+                nameDBLocal.setText("");
                 latLong.setText("");
                 goToMainActivity();
             }
@@ -111,32 +113,37 @@ public class HomeActivity extends AppCompatActivity {
             /*
             if (Objects.equals(userAuth.getDisplayName(), "") || userAuth.getDisplayName() == null) {
 
-                nombres.setText("Unregistered names");
+                nameDBRealTime.setText("Unregistered names");
             }
             else {
-                nombres.setText(userAuth.getDisplayName());
+                nameDBRealTime.setText(userAuth.getDisplayName());
             }
             */
             database.child("user").child(userAuth.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         User user =  dataSnapshot.getValue(User.class);
-                        assert user != null;
-                        nombres.setText(user.getName());
+                        if (user != null) {
+                            nameDBRealTime.setText(user.getName());
+                            emailDBRealTime.setText(user.getEmail());
+                        }
+                        else {
+                            nameDBRealTime.setText("Unregistered names");
+                            emailDBRealTime.setText("Unregistered email");
+                        }
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        nombres.setText("Unregistered names");
+                        //error en con el usuerio en DBRealTime
+                        Log.d(TAG, "onCancelled: ");
                     }
                 });
-            email.setText(userAuth.getEmail());
             DBHelper dbHelper = new DBHelper(getApplicationContext());
-            String nameUserDBLocal = dbHelper.getUser(getApplicationContext(),userAuth.getEmail());
-            Toast.makeText(HomeActivity.this, "User "+nameUserDBLocal+" - DBLocal",Toast.LENGTH_LONG).show();
+            String nameUserDBLocal = dbHelper.getUserName(getApplicationContext(),userAuth.getEmail());
+            nameDBLocal.setText(nameUserDBLocal);
         } else {
-            Log.d("user null", "loginUser: null");
+            Log.d(TAG, "informationUser: No User");
             startActivity(new Intent(HomeActivity.this, MainActivity.class));
         }
     }

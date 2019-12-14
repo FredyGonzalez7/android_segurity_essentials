@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -50,7 +49,7 @@ public class DBHelper extends SQLiteOpenHelper {
     String insertRow(Context context, String uid, String email, String name) {
         //falta verificar que no exista errores en el insert
 
-        if (getUser(context,email)==null){
+        if (getUserName(context,email)==null){
             /*ContentValues contentValues = new ContentValues();
             contentValues.put(COLUMN_EMAIL, email);
             contentValues.put(COLUMN_NAME, name);
@@ -62,8 +61,6 @@ public class DBHelper extends SQLiteOpenHelper {
             SQLiteDatabase db = this.getWritableDatabase();
             //String query = "INSERT INTO "+TABLE_NAME+" ("+COLUMN_EMAIL+", "+COLUMN_NAME+", "+COLUMN_UID+") VALUES ("+email+","+name+","+uid+")";
             String query = "INSERT INTO user (email,name,uid) VALUES ('"+email+"','"+name+"','"+uid+"')";
-            //String query = "INSERT INTO user (name,email,uid) VALUES ("+name+","+email+","+uid+")";
-            Log.d(TAG, "insertRow: query " + query);
             db.execSQL(query);
             db.close();
             return "User Register";
@@ -71,14 +68,15 @@ public class DBHelper extends SQLiteOpenHelper {
         else return null;
     }
 
-    String getUser(Context context, String email) {
+    String getUserName(Context context, String email) {
         try {
             DBHelper dbHelper = new DBHelper(context,DATABASE_NAME,null,DATABASE_VERSION);
             SQLiteDatabase db = dbHelper.getReadableDatabase();
-            Cursor cursor = db.rawQuery("SELECT name,uid FROM " + TABLE_NAME + " where email = '"+email+"'", null);
+            String query ="SELECT "+COLUMN_EMAIL+","+COLUMN_NAME+" FROM " + TABLE_NAME + " WHERE "+COLUMN_EMAIL+" = '"+email+"'";
+            Cursor cursor = db.rawQuery(query, null);
             cursor.moveToFirst();
             String name;
-            name= cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
+            name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME));
             cursor.close();
             return name;
         } catch (Exception e) {
